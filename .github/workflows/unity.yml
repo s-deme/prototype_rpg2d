@@ -1,0 +1,52 @@
+name: Unity validation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  checks: write
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check release inputs
+        shell: pwsh
+        run: ./scripts/Test-ReleasePreflight.ps1
+      - name: Run Unity editor tests
+        id: editor-tests
+        uses: game-ci/unity-test-runner@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: 2022.3.62f1
+          testMode: EditMode
+          artifactsPath: artifacts
+          coverageEnabled: false
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload Unity test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Alice-RPG-EditMode-Test-Results
+          path: ${{ steps.editor-tests.outputs.artifactsPath }}
+          if-no-files-found: warn
+      - name: Build Windows player
+        uses: game-ci/unity-builder@v4
+        env:
+          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+        with:
+          unityVersion: 2022.3.62f1
+          targetPlatform: StandaloneWindows64
+          buildMethod: AliceRpgBuild.BuildWindows
+      - name: Package Windows release
+        shell: pwsh
+        run: ./scripts/Package-WindowsRelease.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Alice-and-the-Broken-Crown-Windows
+          path: Releases
