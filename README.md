@@ -11,15 +11,15 @@
 - BGM／SE別音量、難易度、文字速度・サイズ、高コントラスト、演出軽減、解像度／フルスクリーン
 - キー割り当て、キーボード／マウス／ゲームパッド操作、フォーカス喪失時の状態を保つ自動ポーズ
 - 会話ログ、早送り／スキップ、宝箱、サブクエスト、敵バリエーション、ボス固有技、NEW GAME+
-- ピクセル調グラフィックと効果音をすべてランタイム生成
+- ピクセル調のゲーム内グラフィックと効果音をランタイム生成
 
 ## 起動
 
-1. Unity Hubでこのフォルダーを開きます（Unity 2022.3 LTS以降を推奨）。
+1. Unity Hubでこのフォルダーを **Unity 2022.3.62f1** として開きます。
 2. `Assets/Scenes/Main.unity` を開きます。
 3. Playボタンを押します。
 
-外部アセットや追加パッケージは不要です。画面・キャラクター・効果音は実行時に生成されます。
+外部のゲーム素材や追加パッケージは不要です。ゲーム内の画面・キャラクター・効果音は実行時に生成され、Windows用アプリアイコンは `Assets/Branding/AliceAppIcon.png` を使用します。
 
 ## 動作環境
 
@@ -44,10 +44,18 @@
 
 Unityで `Alice RPG > Build Windows` を選ぶと、`Builds/Windows` にWindows 64-bit版を出力します。EditModeテストはUnity Test Runnerから実行できます。GitHub Actions用の設定も [.github/workflows/unity.yml](.github/workflows/unity.yml) に含めています（Unityライセンスシークレットが必要です）。
 
-Windowsビルドには上記の文書を収めた `Documentation` フォルダーが自動で含まれます。タイトルの「クレジット・サポート」から、バージョン、ローカル保存、問い合わせ時に必要な情報も確認できます。
+Windowsビルドには、次節の配布文書を収めた `Documentation` フォルダーが自動で含まれます。タイトルの「クレジット・サポート」から、バージョン、ローカル保存、問い合わせ時に必要な情報も確認できます。
+
+## ドキュメント
+
+- [BUILDING.md](BUILDING.md) — ローカルビルド、テスト、リリース手順
+- [CREDITS.md](CREDITS.md) — 制作・素材クレジット
+- [PRIVACY.md](PRIVACY.md) — 保存データとオフライン動作
+- [KNOWN_ISSUES.md](KNOWN_ISSUES.md) — 既知の制約と配布前確認
+- [PRODUCT_IMPROVEMENTS.md](PRODUCT_IMPROVEMENTS.md) — これまでの製品化改善履歴
 
 ## 製品化改善
 
-10回の初期監査と今回の製品化拡張は [`PRODUCT_IMPROVEMENTS.md`](PRODUCT_IMPROVEMENTS.md) にまとめています。
+初期監査から安定化までの改善履歴は [`PRODUCT_IMPROVEMENTS.md`](PRODUCT_IMPROVEMENTS.md) にまとめています。現在の操作・ビルド手順はREADMEとBUILDINGを正本としてください。
 
 白ウサギ、イモムシ、チェシャ猫を訪ねて「時の欠片」を3つ集め、ハートの城へ向かってください。

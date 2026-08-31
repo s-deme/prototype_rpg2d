@@ -8,7 +8,7 @@
 4. Collect the generated `Builds/Windows` directory as one unit; the executable needs its adjacent data files. The build also creates `Documentation` with the release documents.
 5. Run `./scripts/Package-WindowsRelease.ps1` from PowerShell to create a ZIP and its `.sha256` checksum in `Releases`.
 
-The build command sets the product name, default 1280×720 full-screen mode, version `1.0.0`, player log output, and Mono scripting backend. Update the company name and version in `Assets/Editor/AliceRpgBuild.cs` before publication if they differ for your release.
+The build command sets the product name, default 1280×720 full-screen mode, version `1.0.0`, player log output, and Mono scripting backend. Update `AliceRpgBuildInfo.Version` in `Assets/Scripts/AliceRpgGame.cs` when preparing a new version; `Assets/Editor/AliceRpgBuild.cs` reads that value into `PlayerSettings.bundleVersion`. Update the company name in `Assets/Editor/AliceRpgBuild.cs` before publication if it differs for your release.
 
 ## Test
 
