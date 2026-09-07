@@ -186,6 +186,22 @@ public sealed class AliceRpgGameTests
     }
 
     [Test]
+    public void FantasyUiTextures_AreGeneratedAtTheirLogicalSizes()
+    {
+        Dictionary<string, Texture2D> textures = (Dictionary<string, Texture2D>)Field("textures").GetValue(game);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(textures["titleBackdrop"].width, Is.EqualTo(240));
+            Assert.That(textures["titleBackdrop"].height, Is.EqualTo(135));
+            Assert.That(textures["battleBackdrop"].width, Is.EqualTo(240));
+            Assert.That(textures["battleBackdrop"].height, Is.EqualTo(100));
+            Assert.That(textures["crown"].width, Is.EqualTo(32));
+            Assert.That(textures["battleShadow"].height, Is.EqualTo(10));
+        });
+    }
+
+    [Test]
     public void DeletingTheActiveSlot_SelectsAnotherRecoverableSlot()
     {
         MethodInfo save = Method("SaveGame");

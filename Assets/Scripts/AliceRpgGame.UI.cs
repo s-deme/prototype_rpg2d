@@ -41,33 +41,31 @@ public sealed partial class AliceRpgGame
 
     private void DrawTitle()
     {
-        GUI.color = new Color32(24, 21, 43, 255);
-        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["white"]);
+        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["titleBackdrop"]);
+        GUI.color = new Color(ink.r, ink.g, ink.b, highContrast ? 1f : 0.58f);
+        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, 184), textures["white"]);
+        GUI.color = Color.white;
+        DrawTexturePixel(textures["crown"], new Rect(448, 17, 64, 40));
+        GUI.Label(new Rect(60, 51, 840, 62), "ALICE & THE BROKEN CROWN", titleOnDarkStyle);
+        GUI.Label(new Rect(120, 112, 720, 34), "アリスと壊れた時の冠", centerOnDarkStyle);
+        GUI.color = gold;
+        GUI.DrawTexture(new Rect(274, 151, 412, 3), textures["white"]);
         GUI.color = Color.white;
 
-        for (int i = 0; i < 42; i++)
-        {
-            int x = (i * 83 + 31) % LogicalWidth;
-            int y = (i * 47 + 19) % 350;
-            int size = (i % 3) + 2;
-            GUI.color = i % 4 == 0 ? gold : new Color(0.65f, 0.78f, 1f, 0.7f);
-            GUI.DrawTexture(new Rect(x, y, size, size), textures["white"]);
-        }
-        GUI.color = Color.white;
-        DrawTexturePixel(textures["alice"], new Rect(414, 118, 132, 132));
-        GUI.Label(new Rect(100, 40, 760, 64), "ALICE", titleOnDarkStyle);
-        GUI.Label(new Rect(100, 91, 760, 42), "& THE BROKEN CROWN", centerOnDarkStyle);
-        GUI.Label(new Rect(100, 248, 760, 36), "アリスと壊れた時の冠", centerOnDarkStyle);
+        DrawPanel(new Rect(48, 204, 450, 76));
+        GUI.Label(new Rect(72, 216, 402, 50), "止まった明日を取り戻すため、\n三つの《時の欠片》をめぐる旅へ。", questStyle);
+        DrawTexturePixel(textures["alice"], new Rect(202, 292, 144, 162));
 
-        DrawPanel(new Rect(310, 280, 340, 226));
+        DrawPanel(new Rect(570, 190, 356, 278));
+        GUI.Label(new Rect(594, 201, 308, 26), "旅をはじめる", hintStyle);
         string[] titleItems =
         {
-            hasSave ? "つづきから　[スロット " + (activeSaveSlot + 1) + "]" : "つづきから（データなし）",
-            "はじめから", "セーブデータを管理", "クリア記録", "設定", "クレジット・サポート", "ゲームをおわる"
+            hasSave ? "つづきから　[しおり " + (activeSaveSlot + 1) + "]" : "つづきから（データなし）",
+            "はじめから", "旅のしおり", "旅の記録", "さくせん", "クレジット", "ゲームをおわる"
         };
         for (int i = 0; i < titleItems.Length; i++)
         {
-            Rect itemRect = new Rect(335, 291 + i * 29, 290, 27);
+            Rect itemRect = new Rect(594, 229 + i * 31, 308, 28);
             DrawMenuItem(itemRect, titleItems[i], titleSelection == i);
             if (!confirmNewGame && !confirmQuit && MouseActivated(itemRect)) { titleSelection = i; ActivateTitleSelection(); }
         }
@@ -76,13 +74,17 @@ public sealed partial class AliceRpgGame
         if (hasSave && titlePreview != null)
         {
             string progress = string.IsNullOrEmpty(titlePreview.chapterName) ? "物語の途中" : titlePreview.chapterName;
-            GUI.Label(new Rect(650, 404, 250, 48), "しおりを読み込めます\n" + progress, centerOnDarkStyle);
+            DrawPanel(new Rect(48, 458, 450, 48));
+            GUI.Label(new Rect(66, 463, 414, 38), "しおり " + (activeSaveSlot + 1) + "　" + progress + "　" + FormatSeconds(titlePreview.playSeconds), hintStyle);
         }
-        GUI.Label(new Rect(110, 508, 740, 22), "A WONDERLAND STORY　—　キーボード / マウス / ゲームパッド対応", smallOnDarkStyle);
+        GUI.color = ink;
+        GUI.DrawTexture(new Rect(0, 512, LogicalWidth, 28), textures["white"]);
+        GUI.color = Color.white;
+        GUI.Label(new Rect(90, 515, 780, 21), "A WONDERLAND STORY　—　キーボード / マウス / ゲームパッド対応", smallOnDarkStyle);
         if (Time.unscaledTime < toastUntil)
         {
-            DrawPanel(new Rect(190, 255, 580, 38));
-            GUI.Label(new Rect(205, 261, 550, 26), toast, hintStyle);
+            DrawPanel(new Rect(160, 158, 640, 40));
+            GUI.Label(new Rect(180, 165, 600, 25), toast, hintStyle);
         }
         if (confirmNewGame || confirmQuit)
         {
@@ -172,9 +174,7 @@ public sealed partial class AliceRpgGame
             GUI.Label(new Rect(playerPosition.x * Tile - 38, Mathf.Max(9, playerPosition.y * Tile - 41), 108, 24), "[" + ConfirmHint() + "] 調べる", hintStyle);
         }
 
-        GUI.color = ink;
-        GUI.DrawTexture(new Rect(0, 512, 960, 28), textures["white"]);
-        GUI.color = Color.white;
+        DrawPanel(new Rect(0, 506, 960, 34));
         GUI.Label(new Rect(14, 515, 500, 22), "アリス  Lv." + level + "   HP " + hp + "/" + maxHp + "   MP " + mp + "/" + maxMp, smallOnDarkStyle);
         GUI.Label(new Rect(525, 515, 419, 22), "欠片 ◆ " + fragments + "/3　 [" + keyQuest + "]目的　 [" + keyLog + "]ログ　 [" + keyCancel + "]メニュー", smallOnDarkStyle);
         if (MouseActivated(new Rect(630, 512, 88, 28))) { showQuest = !showQuest; Play(confirmSound); }
@@ -272,7 +272,8 @@ public sealed partial class AliceRpgGame
         GUI.color = Color.white;
         Rect box = new Rect(54, 357, 852, 147);
         DrawPanel(box);
-        GUI.Label(new Rect(77, 344, 210, 34), " " + dialogueSpeaker + " ", speakerStyle);
+        DrawPanel(new Rect(70, 338, 230, 42));
+        GUI.Label(new Rect(84, 345, 202, 28), dialogueSpeaker, speakerStyle);
         string text = VisibleDialogueText();
         GUI.Label(new Rect(82, 389, 796, 80), text, dialogueStyle);
         string continueHint = DialoguePageFullyRevealed() ? "▼ " + ConfirmHint() + "でつづく　Tabでスキップ" : "▼ " + ConfirmHint() + "で全文表示　Shiftで早送り";
@@ -282,30 +283,30 @@ public sealed partial class AliceRpgGame
 
     private void DrawBattle()
     {
-        GUI.color = new Color32(28, 30, 62, 255);
-        GUI.DrawTexture(new Rect(0, 0, 960, 540), textures["white"]);
-        GUI.color = new Color32(55, 61, 105, 255);
-        GUI.DrawTexture(new Rect(0, 285, 960, 115), textures["white"]);
-        GUI.color = new Color32(82, 74, 116, 255);
-        for (int i = 0; i < 14; i++) GUI.DrawTexture(new Rect(i * 76 - 20, 270 + (i % 2) * 14, 62, 130), textures["white"]);
+        GUI.DrawTexture(new Rect(0, 0, 960, 377), textures["battleBackdrop"]);
+        GUI.color = new Color(ink.r, ink.g, ink.b, 0.22f);
+        GUI.DrawTexture(new Rect(0, 0, 960, 377), textures["white"]);
         GUI.color = Color.white;
 
-        DrawPanel(new Rect(28, 22, 290, 95));
+        DrawPanel(new Rect(28, 22, 300, 104));
         GUI.Label(new Rect(48, 38, 250, 24), "アリス　Lv." + level, labelStyle);
         GUI.Label(new Rect(48, 68, 250, 24), "HP " + hp + "/" + maxHp + "　 MP " + mp + "/" + maxMp, labelStyle);
         if (weakenedTurns > 0) GUI.Label(new Rect(48, 95, 250, 18), "状態：力が弱い　残り " + weakenedTurns + " 回", hintStyle);
 
-        GUI.Label(new Rect(535, 30, 380, 38), enemy.name, centerOnDarkStyle);
+        DrawPanel(new Rect(590, 20, 270, 54));
+        GUI.Label(new Rect(608, 29, 234, 34), enemy.name, centerOnDarkStyle);
+        DrawTexturePixel(textures["battleShadow"], new Rect(620, 291, 210, 40));
         DrawTexturePixel(enemy.sprite, new Rect(605, 92, 240, 240));
         DrawBar(new Rect(590, 332, 270, 16), enemy.hp, enemy.maxHp, rose);
 
         DrawPanel(new Rect(28, 377, 420, 143));
-        string[] commands = { "たたかう", "ひかり (MP 4)", "まもる +MP", "小瓶 × " + potions, "しらべる", enemy.boss ? "にげる ×" : "にげる" };
+        GUI.Label(new Rect(50, 381, 160, 22), "コマンド", speakerStyle);
+        string[] commands = { "こうげき", "ひかり　MP 4", "まもる　+MP", "小瓶　× " + potions, "しらべる", enemy.boss ? "にげる　×" : "にげる" };
         for (int i = 0; i < commands.Length; i++)
         {
             int col = i % 2;
             int row = i / 2;
-            Rect commandRect = new Rect(48 + col * 190, 389 + row * 40, 176, 34);
+            Rect commandRect = new Rect(48 + col * 190, 404 + row * 35, 176, 30);
             DrawMenuItem(commandRect, commands[i], pendingBattle == PendingBattle.None && battleSelection == i);
             if (pendingBattle == PendingBattle.None && MouseActivated(commandRect))
             {
@@ -315,11 +316,12 @@ public sealed partial class AliceRpgGame
             }
         }
         DrawPanel(new Rect(466, 377, 466, 143));
-        Rect messageRect = new Rect(492, 398, 412, 92);
+        GUI.Label(new Rect(490, 381, 180, 22), "戦いのようす", speakerStyle);
+        Rect messageRect = new Rect(492, 409, 412, 78);
         GUI.Label(messageRect, battleMessage, dialogueStyle);
         if (pendingBattle != PendingBattle.None) GUI.Label(new Rect(760, 492, 140, 20), "▼ 決定", smallStyle);
         if (pendingBattle != PendingBattle.None && MouseActivated(new Rect(466, 377, 466, 143))) AdvanceBattleMessage();
-        if (enemyInspected) GUI.Label(new Rect(602, 352, 246, 20), "HP " + enemy.hp + "/" + enemy.maxHp + "  ATK " + enemy.attack, smallOnDarkStyle);
+        if (enemyInspected) DrawWorldLabel(new Rect(602, 350, 246, 22), "HP " + enemy.hp + "/" + enemy.maxHp + "  ATK " + enemy.attack);
     }
 
     private void DrawPause()
@@ -328,7 +330,7 @@ public sealed partial class AliceRpgGame
         GUI.DrawTexture(new Rect(0, 0, 960, 540), textures["white"]);
         GUI.color = Color.white;
         DrawPanel(new Rect(244, 48, 472, 444));
-        GUI.Label(new Rect(274, 94, 412, 44), "STORY MENU", titleStyle);
+        GUI.Label(new Rect(274, 94, 412, 44), "旅のメニュー", titleStyle);
         GUI.Label(new Rect(286, 147, 388, 50), "Lv." + level + "　HP " + hp + "/" + maxHp + "　MP " + mp + "/" + maxMp +
             "\n歩数 " + stepsTaken + "　勝利 " + battlesWon + "　欠片 " + fragments + "/3", hintStyle);
         string badges = "記録：" + (stepsTaken >= 100 ? "旅人✓ " : "旅人 " + stepsTaken + "/100  ") +
@@ -348,11 +350,9 @@ public sealed partial class AliceRpgGame
 
     private void DrawSettings()
     {
-        GUI.color = new Color32(24, 21, 43, 255);
-        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["white"]);
-        GUI.color = Color.white;
+        DrawMenuBackdrop();
         DrawPanel(new Rect(180, 24, 600, 494));
-        GUI.Label(new Rect(210, 42, 540, 48), "SETTINGS", titleStyle);
+        GUI.Label(new Rect(210, 42, 540, 48), "さくせん", titleStyle);
         string difficultyName = difficulty == 0 ? "ストーリー" : difficulty == 2 ? "チャレンジ" : "スタンダード";
         string speedName = textSpeed == 0 ? "ゆっくり" : textSpeed == 2 ? "はやい" : "ふつう";
         string[] items =
@@ -425,11 +425,9 @@ public sealed partial class AliceRpgGame
 
     private void DrawSaveSlots()
     {
-        GUI.color = new Color32(24, 21, 43, 255);
-        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["white"]);
-        GUI.color = Color.white;
+        DrawMenuBackdrop();
         DrawPanel(new Rect(180, 44, 600, 452));
-        string title = saveSlotPurpose == SaveSlotPurpose.Save ? "SAVE YOUR STORY" : "SAVE DATA";
+        string title = saveSlotPurpose == SaveSlotPurpose.Save ? "旅のしおりに記録" : "旅のしおり";
         string description = saveSlotPurpose == SaveSlotPurpose.Save ? "保存先のしおりを選んでください" : "スロットを選び、下の操作を選んでください";
         GUI.Label(new Rect(210, 64, 540, 48), title, titleStyle);
         GUI.Label(new Rect(235, 116, 490, 24), description, hintStyle);
@@ -500,11 +498,9 @@ public sealed partial class AliceRpgGame
 
     private void DrawControls()
     {
-        GUI.color = new Color32(24, 21, 43, 255);
-        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["white"]);
-        GUI.color = Color.white;
+        DrawMenuBackdrop();
         DrawPanel(new Rect(200, 34, 560, 472));
-        GUI.Label(new Rect(230, 54, 500, 48), "CONTROLS", titleStyle);
+        GUI.Label(new Rect(230, 54, 500, 48), "キー設定", titleStyle);
         GUI.Label(new Rect(240, 108, 480, 22), "項目を選んで決定し、新しいキーを押してください。", hintStyle);
         for (int i = 0; i < ControlMenuItemCount; i++)
         {
@@ -541,7 +537,7 @@ public sealed partial class AliceRpgGame
         GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["white"]);
         GUI.color = Color.white;
         DrawPanel(new Rect(110, 58, 740, 420));
-        GUI.Label(new Rect(140, 78, 680, 42), "DIALOGUE LOG", titleStyle);
+        GUI.Label(new Rect(140, 78, 680, 42), "会話の記録", titleStyle);
         if (dialogueHistory.Count == 0) GUI.Label(new Rect(150, 205, 660, 40), "まだ記録された会話はありません。", centerStyle);
         else
         {
@@ -566,11 +562,9 @@ public sealed partial class AliceRpgGame
 
     private void DrawRecords()
     {
-        GUI.color = new Color32(24, 21, 43, 255);
-        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["white"]);
-        GUI.color = Color.white;
+        DrawMenuBackdrop();
         DrawPanel(new Rect(170, 54, 620, 432));
-        GUI.Label(new Rect(200, 74, 560, 48), "STORY RECORDS", titleStyle);
+        GUI.Label(new Rect(200, 74, 560, 48), "旅の記録", titleStyle);
         for (int i = 0; i < SaveSlotCount; i++)
         {
             SaveData data = ReadSave(i);
@@ -586,11 +580,9 @@ public sealed partial class AliceRpgGame
 
     private void DrawCredits()
     {
-        GUI.color = new Color32(24, 21, 43, 255);
-        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["white"]);
-        GUI.color = Color.white;
+        DrawMenuBackdrop();
         DrawPanel(new Rect(160, 48, 640, 444));
-        GUI.Label(new Rect(190, 68, 580, 48), "CREDITS & SUPPORT", titleStyle);
+        GUI.Label(new Rect(190, 68, 580, 48), "クレジット・サポート", titleStyle);
         GUI.Label(new Rect(205, 130, 550, 190),
             "Alice & The Broken Crown　Version " + AliceRpgBuildInfo.Version + "\n\n" +
             "Design, code, pixel art, and sound: Wonderland Workshop\n" +
@@ -683,26 +675,20 @@ public sealed partial class AliceRpgGame
 
     private void DrawEnding()
     {
-        GUI.color = new Color32(248, 229, 198, 255);
-        GUI.DrawTexture(new Rect(0, 0, 960, 540), textures["white"]);
-        GUI.color = ink;
-        for (int i = 0; i < 24; i++)
-        {
-            float angle = i * Mathf.PI * 2f / 24f;
-            float x = 480 + Mathf.Cos(angle) * (150 + i % 3 * 22);
-            float y = 232 + Mathf.Sin(angle) * (110 + i % 2 * 18);
-            GUI.DrawTexture(new Rect(x, y, 10, 10), textures["white"]);
-        }
+        DrawMenuBackdrop();
         GUI.color = Color.white;
-        DrawTexturePixel(textures["alice"], new Rect(414, 165, 132, 132));
-        GUI.Label(new Rect(100, 62, 760, 64), "THE END", titleStyle);
-        GUI.Label(new Rect(140, 312, 680, 60), "明日は、選んだ一歩の先にある。", centerStyle);
-        GUI.Label(new Rect(140, 384, 680, 28), "クリアレベル  " + level + "　　集めた時の欠片  " + fragments + "/3", centerStyle);
-        GUI.Label(new Rect(140, 419, 680, 26), "歩数 " + stepsTaken + "　勝利 " + battlesWon + "　プレイ時間 " + PlayTimeText(), hintStyle);
+        DrawTexturePixel(textures["crown"], new Rect(448, 30, 64, 40));
+        GUI.Label(new Rect(100, 75, 760, 54), "そして 物語は つづく", titleStyle);
+        DrawTexturePixel(textures["alice"], new Rect(414, 130, 132, 148));
+        DrawPanel(new Rect(140, 288, 680, 142));
+        GUI.Label(new Rect(164, 304, 632, 46), "明日は、選んだ一歩の先にある。", centerStyle);
+        GUI.Label(new Rect(164, 354, 632, 28), "クリアレベル  " + level + "　　集めた時の欠片  " + fragments + "/3", centerStyle);
+        GUI.Label(new Rect(164, 390, 632, 24), "歩数 " + stepsTaken + "　勝利 " + battlesWon + "　プレイ時間 " + PlayTimeText(), hintStyle);
+        DrawPanel(new Rect(250, 438, 460, 94));
         string[] endingItems = { "NEW GAME+　（Lv.2から再び物語へ）", "クリア記録を見る", "タイトルへ" };
         for (int i = 0; i < endingItems.Length; i++)
         {
-            Rect itemRect = new Rect(280, 448 + i * 27, 400, 24);
+            Rect itemRect = new Rect(276, 444 + i * 27, 408, 24);
             DrawMenuItem(itemRect, endingItems[i], endingSelection == i);
             if (MouseActivated(itemRect))
             {
@@ -714,15 +700,15 @@ public sealed partial class AliceRpgGame
 
     private void DrawGameOver()
     {
-        GUI.color = new Color32(19, 17, 29, 255);
-        GUI.DrawTexture(new Rect(0, 0, 960, 540), textures["white"]);
-        GUI.color = Color.white;
-        GUI.Label(new Rect(100, 160, 760, 70), "THE STORY SLEEPS", titleOnDarkStyle);
-        GUI.Label(new Rect(120, 255, 720, 60), "物語は閉じてしまった。\nけれど、ページはいつでも開き直せる。", centerOnDarkStyle);
+        DrawMenuBackdrop();
+        DrawPanel(new Rect(160, 128, 640, 212));
+        GUI.Label(new Rect(190, 158, 580, 54), "物語は いったん閉じられた", titleStyle);
+        GUI.Label(new Rect(190, 234, 580, 60), "けれど、ページはいつでも開き直せる。\n旅のしおりから、もう一度。", centerStyle);
+        DrawPanel(new Rect(300, 356, 360, 112));
         string[] choices = { hasSave ? "直前のしおりから再開" : "再開データなし", "タイトルへ" };
         for (int i = 0; i < choices.Length; i++)
         {
-            Rect itemRect = new Rect(330, 360 + i * 48, 300, 38);
+            Rect itemRect = new Rect(326, 373 + i * 43, 308, 34);
             DrawMenuItem(itemRect, choices[i], gameOverSelection == i);
             if (MouseActivated(itemRect))
             {
@@ -732,30 +718,48 @@ public sealed partial class AliceRpgGame
         }
     }
 
+    private void DrawMenuBackdrop()
+    {
+        GUI.color = Color.white;
+        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["titleBackdrop"]);
+        GUI.color = highContrast ? Color.black : new Color(ink.r, ink.g, ink.b, 0.82f);
+        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["white"]);
+        GUI.color = Color.white;
+    }
+
     private void DrawPanel(Rect rect)
     {
-        GUI.color = highContrast ? Color.white : surface;
+        GUI.color = new Color(0f, 0f, 0f, 0.38f);
+        GUI.DrawTexture(new Rect(rect.x + 5, rect.y + 5, rect.width, rect.height), textures["white"]);
+        GUI.color = highContrast ? Color.black : surface;
         GUI.DrawTexture(rect, textures["white"]);
-        GUI.color = ink;
-        GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 4), textures["white"]);
-        GUI.DrawTexture(new Rect(rect.x, rect.yMax - 4, rect.width, 4), textures["white"]);
-        GUI.DrawTexture(new Rect(rect.x, rect.y, 4, rect.height), textures["white"]);
-        GUI.DrawTexture(new Rect(rect.xMax - 4, rect.y, 4, rect.height), textures["white"]);
-        GUI.color = gold;
-        GUI.DrawTexture(new Rect(rect.x + 7, rect.y + 7, rect.width - 14, 2), textures["white"]);
+        GUI.color = cream;
+        GUI.DrawTexture(new Rect(rect.x, rect.y, rect.width, 3), textures["white"]);
+        GUI.DrawTexture(new Rect(rect.x, rect.yMax - 3, rect.width, 3), textures["white"]);
+        GUI.DrawTexture(new Rect(rect.x, rect.y, 3, rect.height), textures["white"]);
+        GUI.DrawTexture(new Rect(rect.xMax - 3, rect.y, 3, rect.height), textures["white"]);
+        if (rect.height > 48f)
+        {
+            GUI.color = highContrast ? Color.white : new Color32(112, 175, 238, 255);
+            GUI.DrawTexture(new Rect(rect.x + 7, rect.y + 7, rect.width - 14, 1), textures["white"]);
+            GUI.DrawTexture(new Rect(rect.x + 7, rect.yMax - 8, rect.width - 14, 1), textures["white"]);
+            GUI.DrawTexture(new Rect(rect.x + 7, rect.y + 7, 1, rect.height - 14), textures["white"]);
+            GUI.DrawTexture(new Rect(rect.xMax - 8, rect.y + 7, 1, rect.height - 14), textures["white"]);
+        }
         GUI.color = Color.white;
     }
 
     private void DrawMenuItem(Rect rect, string text, bool selected)
     {
-        if (selected)
+        Event current = Event.current;
+        bool hovered = current != null && rect.Contains((current.mousePosition - guiOffset) / guiScale);
+        if (selected || hovered)
         {
-            GUI.color = rose;
+            GUI.color = highContrast ? new Color(1f, 1f, 1f, selected ? 0.24f : 0.12f) : new Color(blue.r, blue.g, blue.b, selected ? 1f : 0.55f);
             GUI.DrawTexture(rect, textures["white"]);
             GUI.color = Color.white;
-            GUI.Label(rect, "◆ " + text, selectedStyle);
         }
-        else GUI.Label(rect, "   " + text, menuStyle);
+        GUI.Label(rect, (selected ? "▶ " : hovered ? "›  " : "   ") + text, selected ? selectedStyle : menuStyle);
     }
 
     private bool MouseActivated(Rect rect)
@@ -796,23 +800,23 @@ public sealed partial class AliceRpgGame
     {
         if (titleStyle != null) return;
         GUI.skin.font = gameFont;
-        titleStyle = NewStyle(32, FontStyle.Bold, TextAnchor.MiddleCenter, ink);
+        titleStyle = NewStyle(32, FontStyle.Bold, TextAnchor.MiddleCenter, gold);
         titleOnDarkStyle = NewStyle(42, FontStyle.Bold, TextAnchor.MiddleCenter, cream);
-        labelStyle = NewStyle(18, FontStyle.Bold, TextAnchor.UpperLeft, ink);
-        smallStyle = NewStyle(14, FontStyle.Normal, TextAnchor.MiddleCenter, ink);
+        labelStyle = NewStyle(18, FontStyle.Bold, TextAnchor.UpperLeft, cream);
+        smallStyle = NewStyle(14, FontStyle.Normal, TextAnchor.MiddleCenter, cream);
         smallOnDarkStyle = NewStyle(14, FontStyle.Normal, TextAnchor.MiddleCenter, cream);
-        centerStyle = NewStyle(20, FontStyle.Bold, TextAnchor.MiddleCenter, ink);
+        centerStyle = NewStyle(20, FontStyle.Bold, TextAnchor.MiddleCenter, cream);
         centerOnDarkStyle = NewStyle(20, FontStyle.Bold, TextAnchor.MiddleCenter, cream);
-        menuStyle = NewStyle(16, FontStyle.Bold, TextAnchor.MiddleLeft, ink);
+        menuStyle = NewStyle(16, FontStyle.Bold, TextAnchor.MiddleLeft, cream);
         selectedStyle = NewStyle(16, FontStyle.Bold, TextAnchor.MiddleLeft, cream);
-        dialogueStyle = NewStyle(19, FontStyle.Bold, TextAnchor.UpperLeft, ink);
+        dialogueStyle = NewStyle(19, FontStyle.Bold, TextAnchor.UpperLeft, cream);
         dialogueStyle.wordWrap = true;
-        speakerStyle = NewStyle(18, FontStyle.Bold, TextAnchor.MiddleLeft, ink);
-        questStyle = NewStyle(17, FontStyle.Bold, TextAnchor.UpperLeft, ink);
+        speakerStyle = NewStyle(18, FontStyle.Bold, TextAnchor.MiddleLeft, gold);
+        questStyle = NewStyle(17, FontStyle.Bold, TextAnchor.UpperLeft, cream);
         questStyle.wordWrap = true;
-        bodyStyle = NewStyle(14, FontStyle.Normal, TextAnchor.UpperLeft, ink);
+        bodyStyle = NewStyle(14, FontStyle.Normal, TextAnchor.UpperLeft, cream);
         bodyStyle.wordWrap = true;
-        hintStyle = NewStyle(15, FontStyle.Bold, TextAnchor.MiddleCenter, ink);
+        hintStyle = NewStyle(15, FontStyle.Bold, TextAnchor.MiddleCenter, cream);
     }
 
     private GUIStyle NewStyle(int size, FontStyle fontStyle, TextAnchor anchor, Color color)

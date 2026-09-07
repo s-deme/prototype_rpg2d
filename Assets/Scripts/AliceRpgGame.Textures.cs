@@ -5,8 +5,8 @@ public sealed partial class AliceRpgGame
     private void CreateTextures()
     {
         textures["white"] = Solid(Color.white);
-        textures["ground"] = TileTexture(new Color32(180, 203, 143, 255), new Color32(169, 192, 132, 255), false);
-        textures["grass"] = TileTexture(new Color32(84, 151, 98, 255), new Color32(69, 132, 87, 255), true);
+        textures["ground"] = TileTexture(new Color32(218, 202, 143, 255), new Color32(195, 177, 116, 255), false);
+        textures["grass"] = TileTexture(new Color32(83, 171, 83, 255), new Color32(57, 137, 70, 255), true);
         textures["water"] = WaterTexture();
         textures["bridge"] = BridgeTexture();
         textures["wall"] = WallTexture();
@@ -14,7 +14,7 @@ public sealed partial class AliceRpgGame
         textures["door"] = DoorTexture();
         textures["chest"] = ChestTexture();
         textures["flower"] = FlowerTexture();
-        textures["alice"] = CharacterTexture(new Color32(80, 161, 215, 255), new Color32(246, 236, 206, 255), new Color32(236, 190, 83, 255));
+        textures["alice"] = CharacterTexture(new Color32(55, 138, 218, 255), new Color32(246, 236, 206, 255), new Color32(255, 211, 82, 255));
         textures["rabbit"] = RabbitTexture();
         textures["hatter"] = CharacterTexture(new Color32(111, 71, 133, 255), new Color32(230, 119, 67, 255), new Color32(58, 42, 68, 255));
         textures["caterpillar"] = CaterpillarTexture();
@@ -24,6 +24,10 @@ public sealed partial class AliceRpgGame
         textures["card"] = CardTexture();
         textures["shadow"] = ShadowTexture();
         textures["queenBattle"] = QueenBattleTexture();
+        textures["titleBackdrop"] = TitleBackdropTexture();
+        textures["battleBackdrop"] = BattleBackdropTexture();
+        textures["crown"] = CrownTexture();
+        textures["battleShadow"] = BattleShadowTexture();
     }
 
     private Texture2D Solid(Color color)
@@ -56,8 +60,8 @@ public sealed partial class AliceRpgGame
     private Texture2D WaterTexture()
     {
         Texture2D t = NewTexture(16, 16);
-        Fill(t, new Color32(56, 132, 181, 255));
-        Color foam = new Color32(104, 190, 210, 255);
+        Fill(t, new Color32(53, 145, 203, 255));
+        Color foam = new Color32(124, 209, 229, 255);
         for (int y = 3; y < 16; y += 6)
             for (int x = (y / 3) % 2; x < 14; x += 6)
                 for (int i = 0; i < 3; i++) t.SetPixel(x + i, y, foam);
@@ -79,8 +83,8 @@ public sealed partial class AliceRpgGame
     private Texture2D WallTexture()
     {
         Texture2D t = NewTexture(16, 16);
-        Fill(t, new Color32(54, 77, 66, 255));
-        Color leaf = new Color32(37, 103, 65, 255);
+        Fill(t, new Color32(47, 103, 65, 255));
+        Color leaf = new Color32(28, 75, 52, 255);
         for (int y = 2; y < 15; y += 5)
             for (int x = (y % 3); x < 15; x += 5) Block(t, x, y, 3, 3, leaf);
         t.Apply();
@@ -90,9 +94,9 @@ public sealed partial class AliceRpgGame
     private Texture2D ShrubTexture()
     {
         Texture2D t = NewTexture(16, 16);
-        Fill(t, new Color32(180, 203, 143, 255));
-        Color dark = new Color32(36, 96, 62, 255);
-        Color light = new Color32(65, 132, 71, 255);
+        Fill(t, new Color32(218, 202, 143, 255));
+        Color dark = new Color32(30, 102, 57, 255);
+        Color light = new Color32(68, 153, 73, 255);
         Block(t, 2, 5, 12, 8, dark);
         Block(t, 4, 3, 5, 8, light);
         Block(t, 9, 4, 4, 7, light);
@@ -113,7 +117,7 @@ public sealed partial class AliceRpgGame
     private Texture2D ChestTexture()
     {
         Texture2D t = NewTexture(16, 16);
-        Fill(t, new Color32(180, 203, 143, 255));
+        Fill(t, new Color32(218, 202, 143, 255));
         Color wood = new Color32(124, 75, 47, 255);
         Color edge = new Color32(73, 47, 43, 255);
         Block(t, 2, 3, 12, 9, wood);
@@ -240,6 +244,89 @@ public sealed partial class AliceRpgGame
         Block(t, 12, 20, 3, 2, ink); Block(t, 19, 20, 3, 2, ink);
         Block(t, 14, 17, 6, 3, ink);
         t.Apply(); return t;
+    }
+
+    private Texture2D TitleBackdropTexture()
+    {
+        Texture2D t = NewTexture(240, 135);
+        Color horizon = new Color32(154, 218, 244, 255);
+        Color zenith = new Color32(45, 105, 188, 255);
+        for (int y = 0; y < t.height; y++)
+            for (int x = 0; x < t.width; x++)
+                t.SetPixel(x, y, Color.Lerp(horizon, zenith, y / (float)(t.height - 1)));
+
+        Color cloud = new Color32(246, 250, 244, 255);
+        Block(t, 18, 101, 31, 5, cloud); Block(t, 24, 106, 18, 4, cloud);
+        Block(t, 174, 91, 42, 5, cloud); Block(t, 183, 96, 23, 4, cloud);
+
+        Color farHill = new Color32(74, 137, 128, 255);
+        for (int x = 0; x < t.width; x++)
+            Block(t, x, 29, 1, 12 + Mathf.RoundToInt(9f * (Mathf.Sin(x * 0.085f) + 1f)), farHill);
+        Block(t, 0, 0, 240, 34, new Color32(77, 155, 78, 255));
+        Block(t, 0, 0, 240, 13, new Color32(47, 117, 64, 255));
+
+        Color river = new Color32(55, 154, 214, 255);
+        for (int y = 0; y < 34; y++) Block(t, 134 - y / 3, y, 16 + y / 2, 1, river);
+        for (int x = 0; x < 240; x += 9) Block(t, x, 15 + (x % 3), 3, 1, new Color32(115, 190, 91, 255));
+
+        Color stone = new Color32(222, 225, 211, 255);
+        Color stoneShade = new Color32(120, 139, 151, 255);
+        Color roof = new Color32(40, 61, 132, 255);
+        Block(t, 102, 34, 35, 28, stoneShade); Block(t, 105, 36, 29, 26, stone);
+        Block(t, 96, 37, 12, 35, stoneShade); Block(t, 98, 39, 8, 33, stone);
+        Block(t, 132, 37, 12, 35, stoneShade); Block(t, 134, 39, 8, 33, stone);
+        Block(t, 108, 58, 23, 23, stoneShade); Block(t, 111, 59, 17, 22, stone);
+        Block(t, 94, 69, 16, 5, roof); Block(t, 130, 69, 16, 5, roof); Block(t, 107, 78, 25, 5, roof);
+        Block(t, 117, 36, 6, 14, new Color32(54, 45, 64, 255));
+        Block(t, 101, 52, 3, 5, new Color32(255, 222, 99, 255));
+        Block(t, 137, 52, 3, 5, new Color32(255, 222, 99, 255));
+        Block(t, 119, 67, 3, 5, new Color32(255, 222, 99, 255));
+        Block(t, 119, 81, 2, 10, new Color32(74, 48, 105, 255));
+        Block(t, 121, 87, 10, 4, new Color32(214, 63, 74, 255));
+        t.Apply();
+        return t;
+    }
+
+    private Texture2D BattleBackdropTexture()
+    {
+        Texture2D t = NewTexture(240, 100);
+        Color horizon = new Color32(185, 228, 242, 255);
+        Color zenith = new Color32(63, 133, 205, 255);
+        for (int y = 0; y < t.height; y++)
+            for (int x = 0; x < t.width; x++)
+                t.SetPixel(x, y, Color.Lerp(horizon, zenith, y / (float)(t.height - 1)));
+        Block(t, 17, 74, 40, 4, new Color32(247, 250, 241, 255));
+        Block(t, 26, 78, 22, 4, new Color32(247, 250, 241, 255));
+        Block(t, 0, 0, 240, 30, new Color32(73, 151, 76, 255));
+        for (int x = 0; x < 240; x++)
+            Block(t, x, 29, 1, 7 + Mathf.RoundToInt(7f * (Mathf.Sin(x * 0.11f) + 1f)), new Color32(55, 112, 75, 255));
+        for (int x = 5; x < 240; x += 12) Block(t, x, 8 + x % 5, 4, 2, new Color32(120, 191, 88, 255));
+        t.Apply();
+        return t;
+    }
+
+    private Texture2D CrownTexture()
+    {
+        Texture2D t = NewTexture(32, 20);
+        Fill(t, Color.clear);
+        Color dark = new Color32(164, 98, 23, 255);
+        Block(t, 3, 2, 26, 5, dark); Block(t, 5, 5, 22, 5, gold);
+        Block(t, 5, 8, 5, 8, gold); Block(t, 14, 8, 5, 11, gold); Block(t, 23, 8, 5, 8, gold);
+        Block(t, 7, 8, 3, 3, new Color32(81, 164, 235, 255));
+        Block(t, 15, 8, 3, 3, rose); Block(t, 24, 8, 3, 3, new Color32(81, 164, 235, 255));
+        Block(t, 6, 5, 20, 2, new Color32(255, 239, 143, 255));
+        t.Apply();
+        return t;
+    }
+
+    private Texture2D BattleShadowTexture()
+    {
+        Texture2D t = NewTexture(32, 10);
+        Fill(t, Color.clear);
+        Color shadow = new Color(0f, 0f, 0f, 0.38f);
+        Block(t, 7, 1, 18, 8, shadow); Block(t, 3, 3, 26, 4, shadow); Block(t, 1, 4, 30, 2, shadow);
+        t.Apply();
+        return t;
     }
 
     private Texture2D NewTexture(int width, int height)

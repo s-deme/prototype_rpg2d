@@ -120,12 +120,12 @@ public sealed partial class AliceRpgGame : MonoBehaviour
     private Action battleVictory;
     private System.Random random = new System.Random();
 
-    private readonly Color ink = new Color32(35, 29, 49, 255);
-    private readonly Color cream = new Color32(255, 246, 216, 255);
-    private readonly Color surface = new Color32(248, 239, 207, 255);
-    private readonly Color blue = new Color32(70, 154, 204, 255);
-    private readonly Color gold = new Color32(246, 195, 68, 255);
-    private readonly Color rose = new Color32(190, 54, 87, 255);
+    private readonly Color ink = new Color32(8, 17, 37, 255);
+    private readonly Color cream = new Color32(250, 252, 255, 255);
+    private readonly Color surface = new Color32(18, 52, 119, 255);
+    private readonly Color blue = new Color32(34, 92, 168, 255);
+    private readonly Color gold = new Color32(255, 211, 82, 255);
+    private readonly Color rose = new Color32(224, 72, 88, 255);
 
     private void Awake()
     {
