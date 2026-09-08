@@ -40,22 +40,10 @@
 
 移動キーは長押しに対応しています。ゲームは進行時と戦闘開始前に自動保存され、ポーズメニューから任意に保存できます。セーブデータは3スロットあり、各スロットに直前のバックアップを保持します。
 
-## ビルドとテスト
+白ウサギ、イモムシ、チェシャ猫を訪ねて「時の欠片」を3つ集め、ハートの城へ向かってください。
 
-Unityで `Alice RPG > Build Windows` を選ぶと、`Builds/Windows` にWindows 64-bit版を出力します。EditModeテストはUnity Test Runnerから実行できます。GitHub Actions用の設定も [.github/workflows/unity.yml](.github/workflows/unity.yml) に含めています（Unityライセンスシークレットが必要です）。
+## サポートとプライバシー
 
-Windowsビルドには、次節の配布文書を収めた `Documentation` フォルダーが自動で含まれます。タイトルの「クレジット・サポート」から、バージョン、ローカル保存、問い合わせ時に必要な情報も確認できます。
-
-## ドキュメント
-
-- [BUILDING.md](BUILDING.md) — ローカルビルド、テスト、リリース手順
 - [CREDITS.md](CREDITS.md) — 制作・素材クレジット
 - [PRIVACY.md](PRIVACY.md) — 保存データとオフライン動作
 - [KNOWN_ISSUES.md](KNOWN_ISSUES.md) — 既知の制約と配布前確認
-- [PRODUCT_IMPROVEMENTS.md](PRODUCT_IMPROVEMENTS.md) — これまでの製品化改善履歴
-
-## 製品化改善
-
-初期監査から安定化までの改善履歴は [`PRODUCT_IMPROVEMENTS.md`](PRODUCT_IMPROVEMENTS.md) にまとめています。現在の操作・ビルド手順はREADMEとBUILDINGを正本としてください。
-
-白ウサギ、イモムシ、チェシャ猫を訪ねて「時の欠片」を3つ集め、ハートの城へ向かってください。
