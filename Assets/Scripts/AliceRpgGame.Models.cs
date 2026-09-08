@@ -6,8 +6,6 @@ public sealed partial class AliceRpgGame
     private const int CurrentSaveVersion = 5;
     private const int SaveSlotCount = 3;
     private const int SaveSlotActionCount = 3;
-    private const int ControlBindingCount = 8;
-    private const int ControlMenuItemCount = ControlBindingCount + 1;
 
     private enum GameMode { Title, Intro, Explore, Dialogue, Battle, Pause, Settings, SaveSlots, Controls, DialogueLog, Records, Credits, Ending, GameOver }
     private enum PendingBattle { None, Menu, Victory, Defeat }
@@ -30,6 +28,9 @@ public sealed partial class AliceRpgGame
         KeyCode.W, KeyCode.S, KeyCode.A, KeyCode.D,
         KeyCode.Space, KeyCode.X, KeyCode.Q, KeyCode.L
     };
+
+    private static int ControlBindingCount => ControlNames.Length;
+    private static int ControlMenuItemCount => ControlBindingCount + 1;
 
     private static readonly Vector2Int[] DisplayResolutions =
     {
