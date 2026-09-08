@@ -1,7 +1,7 @@
 {
   "name": "AliceRpg.EditorTests",
   "rootNamespace": "",
-  "references": ["Assembly-CSharp"],
+  "references": ["AliceRpg.Runtime"],
   "includePlatforms": ["Editor"],
   "excludePlatforms": [],
   "allowUnsafeCode": false,

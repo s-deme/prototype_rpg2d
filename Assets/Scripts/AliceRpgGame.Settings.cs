@@ -178,8 +178,7 @@ public sealed partial class AliceRpgGame
         else if (settingsSelection == 8) RequestDisplayChange(!fullscreen, resolutionIndex);
         else if (settingsSelection == 9)
             RequestDisplayChange(fullscreen, (resolutionIndex + direction + DisplayResolutions.Length) % DisplayResolutions.Length);
-        if (audioSource != null) audioSource.volume = 0.22f * sfxVolume;
-        if (musicSource != null) musicSource.volume = 0.075f * musicVolume;
+        ApplyAudioVolumes();
     }
 
     private void LoadSettings()
@@ -198,8 +197,7 @@ public sealed partial class AliceRpgGame
         for (int i = 0; i < ControlBindingCount; i++)
             SetBindingValue(i, LoadKey(ControlPreferenceKeys[i], DefaultControlBindings[i]));
         if (NormalizeKeyBindings()) SaveKeyBindings();
-        if (audioSource != null) audioSource.volume = 0.22f * sfxVolume;
-        if (musicSource != null) musicSource.volume = 0.075f * musicVolume;
+        ApplyAudioVolumes();
         ApplyDisplaySettings();
     }
 
@@ -217,7 +215,6 @@ public sealed partial class AliceRpgGame
         PlayerPrefs.SetInt("AliceRpg.Resolution", resolutionIndex);
         PlayerPrefs.SetInt("AliceRpg.ActiveSlot", activeSaveSlot);
         SaveKeyBindings();
-        PlayerPrefs.Save();
     }
 
     private KeyCode LoadKey(string action, KeyCode fallback)
@@ -289,6 +286,29 @@ public sealed partial class AliceRpgGame
         for (int i = 0; i < ControlBindingCount; i++) SetBindingValue(i, DefaultControlBindings[i]);
         ApplyDisplaySettings();
         SaveSettings();
+    }
+
+    private void ConfirmSettingsReset()
+    {
+        confirmResetSettings = false;
+        ResetSettings();
+        Toast("設定を初期状態に戻しました。");
+    }
+
+    private void ConfirmDisplayChange()
+    {
+        confirmDisplayChange = false;
+        SaveSettings();
+        Toast("表示設定を保存しました。");
+    }
+
+    private void CancelDisplayChange()
+    {
+        fullscreen = previousFullscreen;
+        resolutionIndex = previousResolutionIndex;
+        ApplyDisplaySettings();
+        confirmDisplayChange = false;
+        Toast("表示設定を元に戻しました。");
     }
 
     private void ApplyDisplaySettings()

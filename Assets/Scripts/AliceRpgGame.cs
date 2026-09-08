@@ -525,6 +525,11 @@ public sealed partial class AliceRpgGame : MonoBehaviour
         int vertical = VerticalInput();
         if (vertical != 0) { controlsSelection = (controlsSelection + vertical + ControlMenuItemCount) % ControlMenuItemCount; Play(moveSound); }
         if (!PressConfirm()) return;
+        ActivateControlsSelection();
+    }
+
+    private void ActivateControlsSelection()
+    {
         if (controlsSelection == ControlBindingCount) { SaveSettings(); mode = controlsReturnMode; }
         else
         {
@@ -542,9 +547,7 @@ public sealed partial class AliceRpgGame : MonoBehaviour
             if (endingVertical != 0) { endingSelection = (endingSelection + endingVertical + 3) % 3; Play(moveSound); }
             if (!PressConfirm()) return;
             Play(confirmSound);
-            if (endingSelection == 0) StartNewGame(true);
-            else if (endingSelection == 1) { recordsReturnMode = GameMode.Ending; mode = GameMode.Records; }
-            else { mode = GameMode.Title; titleSelection = 0; }
+            ActivateEndingSelection();
             return;
         }
         int vertical = VerticalInput();
@@ -555,6 +558,18 @@ public sealed partial class AliceRpgGame : MonoBehaviour
         }
         if (!PressConfirm()) return;
         Play(confirmSound);
+        ActivateGameOverSelection();
+    }
+
+    private void ActivateEndingSelection()
+    {
+        if (endingSelection == 0) StartNewGame(true);
+        else if (endingSelection == 1) { recordsReturnMode = GameMode.Ending; mode = GameMode.Records; }
+        else { mode = GameMode.Title; titleSelection = 0; }
+    }
+
+    private void ActivateGameOverSelection()
+    {
         if (gameOverSelection == 0 && hasSave) RequestLoadSlot(activeSaveSlot, GameMode.GameOver);
         else
         {
@@ -569,17 +584,11 @@ public sealed partial class AliceRpgGame : MonoBehaviour
         {
             if (Time.unscaledTime >= displayConfirmUntil || PressCancel())
             {
-                fullscreen = previousFullscreen;
-                resolutionIndex = previousResolutionIndex;
-                ApplyDisplaySettings();
-                confirmDisplayChange = false;
-                Toast("表示設定を元に戻しました。");
+                CancelDisplayChange();
             }
             else if (PressConfirm())
             {
-                confirmDisplayChange = false;
-                SaveSettings();
-                Toast("表示設定を保存しました。");
+                ConfirmDisplayChange();
             }
             return;
         }
@@ -588,9 +597,7 @@ public sealed partial class AliceRpgGame : MonoBehaviour
             if (PressCancel()) { confirmResetSettings = false; Play(confirmSound); }
             else if (PressConfirm())
             {
-                confirmResetSettings = false;
-                ResetSettings();
-                Toast("設定を初期状態に戻しました。");
+                ConfirmSettingsReset();
             }
             return;
         }
@@ -609,6 +616,11 @@ public sealed partial class AliceRpgGame : MonoBehaviour
         int horizontal = HorizontalInput();
         if (horizontal != 0) ChangeSetting(horizontal);
         if (!PressConfirm()) return;
+        ActivateSettingsSelection();
+    }
+
+    private void ActivateSettingsSelection()
+    {
         if (settingsSelection == 10)
         {
             controlsSelection = 0;
@@ -670,8 +682,7 @@ public sealed partial class AliceRpgGame : MonoBehaviour
 
     private int ChestIndexAt(Vector2Int position)
     {
-        for (int i = 0; i < chestPositions.Count; i++) if (chestPositions[i] == position) return i;
-        return -1;
+        return chestPositions.IndexOf(position);
     }
 
     private bool IsChestOpened(int index) { return (openedChests & (1 << index)) != 0; }
@@ -900,6 +911,11 @@ public sealed partial class AliceRpgGame : MonoBehaviour
         }
         if (!PressConfirm()) return;
         Play(confirmSound);
+        ActivateBattleSelection();
+    }
+
+    private void ActivateBattleSelection()
+    {
         if (battleSelection == 0) PlayerAttack(false);
         else if (battleSelection == 1) PlayerAttack(true);
         else if (battleSelection == 2) Guard();

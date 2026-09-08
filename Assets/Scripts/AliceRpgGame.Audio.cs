@@ -64,6 +64,12 @@ public sealed partial class AliceRpgGame
         return clip;
     }
 
+    private void ApplyAudioVolumes()
+    {
+        if (audioSource != null) audioSource.volume = 0.22f * sfxVolume;
+        if (musicSource != null) musicSource.volume = 0.075f * musicVolume;
+    }
+
     private void Play(AudioClip clip)
     {
         if (audioSource != null && clip != null) audioSource.PlayOneShot(clip);

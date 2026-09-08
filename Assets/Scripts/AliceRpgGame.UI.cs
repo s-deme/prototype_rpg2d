@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -88,9 +87,7 @@ public sealed partial class AliceRpgGame
         }
         if (confirmNewGame || confirmQuit)
         {
-            GUI.color = new Color(0f, 0f, 0f, 0.72f);
-            GUI.DrawTexture(new Rect(0, 0, 960, 540), textures["white"]);
-            GUI.color = Color.white;
+            DrawDimmer(0.72f);
             DrawPanel(new Rect(250, 178, 460, 184));
             GUI.Label(new Rect(280, 202, 400, 62), confirmNewGame ? "現在のしおりを上書きして\nはじめから遊びますか？" : "ゲームを終了しますか？", centerStyle);
             Rect yesRect = new Rect(300, 294, 160, 38);
@@ -163,15 +160,10 @@ public sealed partial class AliceRpgGame
 
         Npc nearby = NpcAt(playerPosition + facing);
         int chestAhead = ChestIndexAt(playerPosition + facing);
-        if (nearby != null && mode == GameMode.Explore)
+        if ((nearby != null || chestAhead >= 0) && mode == GameMode.Explore)
         {
             DrawPanel(new Rect(playerPosition.x * Tile - 42, Mathf.Max(8, playerPosition.y * Tile - 42), 116, 28));
-            GUI.Label(new Rect(playerPosition.x * Tile - 38, Mathf.Max(9, playerPosition.y * Tile - 41), 108, 24), "[" + ConfirmHint() + "] 話す", hintStyle);
-        }
-        else if (chestAhead >= 0 && mode == GameMode.Explore)
-        {
-            DrawPanel(new Rect(playerPosition.x * Tile - 42, Mathf.Max(8, playerPosition.y * Tile - 42), 116, 28));
-            GUI.Label(new Rect(playerPosition.x * Tile - 38, Mathf.Max(9, playerPosition.y * Tile - 41), 108, 24), "[" + ConfirmHint() + "] 調べる", hintStyle);
+            GUI.Label(new Rect(playerPosition.x * Tile - 38, Mathf.Max(9, playerPosition.y * Tile - 41), 108, 24), "[" + ConfirmHint() + "] " + (nearby != null ? "話す" : "調べる"), hintStyle);
         }
 
         DrawPanel(new Rect(0, 506, 960, 34));
@@ -267,9 +259,7 @@ public sealed partial class AliceRpgGame
 
     private void DrawDialogue()
     {
-        GUI.color = new Color(0f, 0f, 0f, 0.5f);
-        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["white"]);
-        GUI.color = Color.white;
+        DrawDimmer(0.5f);
         Rect box = new Rect(54, 357, 852, 147);
         DrawPanel(box);
         DrawPanel(new Rect(70, 338, 230, 42));
@@ -311,8 +301,7 @@ public sealed partial class AliceRpgGame
             if (pendingBattle == PendingBattle.None && MouseActivated(commandRect))
             {
                 battleSelection = i;
-                if (i == 0) PlayerAttack(false); else if (i == 1) PlayerAttack(true); else if (i == 2) Guard();
-                else if (i == 3) UsePotion(); else if (i == 4) InspectEnemy(); else TryRun();
+                ActivateBattleSelection();
             }
         }
         DrawPanel(new Rect(466, 377, 466, 143));
@@ -326,9 +315,7 @@ public sealed partial class AliceRpgGame
 
     private void DrawPause()
     {
-        GUI.color = new Color(0f, 0f, 0f, 0.62f);
-        GUI.DrawTexture(new Rect(0, 0, 960, 540), textures["white"]);
-        GUI.color = Color.white;
+        DrawDimmer(0.62f);
         DrawPanel(new Rect(244, 48, 472, 444));
         GUI.Label(new Rect(274, 94, 412, 44), "旅のメニュー", titleStyle);
         GUI.Label(new Rect(286, 147, 388, 50), "Lv." + level + "　HP " + hp + "/" + maxHp + "　MP " + mp + "/" + maxMp +
@@ -378,10 +365,7 @@ public sealed partial class AliceRpgGame
             if (MouseActivated(itemRect))
             {
                 settingsSelection = i;
-                if (i == 10) { controlsSelection = 0; rebindAction = -1; controlsReturnMode = GameMode.Settings; mode = GameMode.Controls; }
-                else if (i == 11) confirmResetSettings = true;
-                else if (i == 12) { SaveSettings(); mode = settingsReturnMode; }
-                else ChangeSetting(1);
+                ActivateSettingsSelection();
             }
         }
         GUI.Label(new Rect(240, 488, 480, 20), "← → で変更　　Esc / X でもどる", smallStyle);
@@ -395,9 +379,7 @@ public sealed partial class AliceRpgGame
 
     private void DrawSettingsConfirmation(string message, string confirmText)
     {
-        GUI.color = new Color(0f, 0f, 0f, 0.72f);
-        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["white"]);
-        GUI.color = Color.white;
+        DrawDimmer(0.72f);
         DrawPanel(new Rect(250, 178, 460, 184));
         GUI.Label(new Rect(280, 202, 400, 62), message, centerStyle);
         Rect yesRect = new Rect(300, 294, 160, 38);
@@ -406,20 +388,13 @@ public sealed partial class AliceRpgGame
         DrawMenuItem(noRect, "元に戻す [Esc]", false);
         if (MouseActivated(yesRect))
         {
-            if (confirmResetSettings) { confirmResetSettings = false; ResetSettings(); Toast("設定を初期状態に戻しました。"); }
-            else { confirmDisplayChange = false; SaveSettings(); Toast("表示設定を保存しました。"); }
+            if (confirmResetSettings) ConfirmSettingsReset();
+            else ConfirmDisplayChange();
         }
         if (MouseActivated(noRect))
         {
             if (confirmResetSettings) confirmResetSettings = false;
-            else
-            {
-                fullscreen = previousFullscreen;
-                resolutionIndex = previousResolutionIndex;
-                ApplyDisplaySettings();
-                confirmDisplayChange = false;
-                Toast("表示設定を元に戻しました。");
-            }
+            else CancelDisplayChange();
         }
     }
 
@@ -465,25 +440,23 @@ public sealed partial class AliceRpgGame
         if (MouseActivated(backRect)) { mode = saveSlotReturnMode; Play(confirmSound); }
 
         if (saveSlotConfirmation == SaveSlotConfirmation.Overwrite)
-            DrawSaveSlotConfirmation("このスロットを上書きしますか？\n直前の内容はバックアップされます。", "上書きする", delegate { saveSlotConfirmation = SaveSlotConfirmation.None; CommitSaveSlot(saveSlotSelection); });
+            DrawSaveSlotConfirmation("このスロットを上書きしますか？\n直前の内容はバックアップされます。", "上書きする");
         else if (saveSlotConfirmation == SaveSlotConfirmation.RestoreBackup)
-            DrawSaveSlotConfirmation("バックアップを通常データへ復元します。\n現在の破損データは置き換えられます。", "復元する", delegate { saveSlotConfirmation = SaveSlotConfirmation.None; RestoreBackupAndLoad(saveSlotSelection); });
+            DrawSaveSlotConfirmation("バックアップを通常データへ復元します。\n現在の破損データは置き換えられます。", "復元する");
         else if (saveSlotConfirmation == SaveSlotConfirmation.Delete)
-            DrawSaveSlotConfirmation("このスロットとバックアップを削除しますか？\nこの操作は元に戻せません。", "削除する", delegate { saveSlotConfirmation = SaveSlotConfirmation.None; DeleteSaveSlot(saveSlotSelection); });
+            DrawSaveSlotConfirmation("このスロットとバックアップを削除しますか？\nこの操作は元に戻せません。", "削除する");
     }
 
-    private void DrawSaveSlotConfirmation(string message, string confirmText, Action confirmed)
+    private void DrawSaveSlotConfirmation(string message, string confirmText)
     {
-        GUI.color = new Color(0f, 0f, 0f, 0.72f);
-        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["white"]);
-        GUI.color = Color.white;
+        DrawDimmer(0.72f);
         DrawPanel(new Rect(250, 178, 460, 184));
         GUI.Label(new Rect(280, 202, 400, 62), message, centerStyle);
         Rect yesRect = new Rect(300, 294, 160, 38);
         Rect noRect = new Rect(500, 294, 160, 38);
         DrawMenuItem(yesRect, confirmText + " [決定]", true);
         DrawMenuItem(noRect, "いいえ [Esc]", false);
-        if (MouseActivated(yesRect)) confirmed();
+        if (MouseActivated(yesRect)) ConfirmSaveSlotSelection();
         if (MouseActivated(noRect)) saveSlotConfirmation = SaveSlotConfirmation.None;
     }
 
@@ -510,15 +483,12 @@ public sealed partial class AliceRpgGame
             if (rebindAction < 0 && MouseActivated(itemRect))
             {
                 controlsSelection = i;
-                if (i == ControlBindingCount) { SaveSettings(); mode = controlsReturnMode; }
-                else { rebindAction = i; rebindStartedAt = Time.unscaledTime; Toast("新しいキーを押してください。Escでキャンセル"); }
+                ActivateControlsSelection();
             }
         }
         GUI.Label(new Rect(240, 448, 480, 44), "ゲームパッド：左スティック/D-Padで移動　A：決定　B：もどる\nX：ログ　Y：クエスト", smallStyle);
         if (rebindAction < 0) return;
-        GUI.color = new Color(0f, 0f, 0f, 0.72f);
-        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["white"]);
-        GUI.color = Color.white;
+        DrawDimmer(0.72f);
         DrawPanel(new Rect(250, 192, 460, 142));
         GUI.Label(new Rect(280, 214, 400, 65), "「" + ControlName(rebindAction) + "」に\n割り当てるキーを押してください", centerStyle);
         GUI.Label(new Rect(280, 292, 400, 22), "Esc：キャンセル", smallStyle);
@@ -533,9 +503,7 @@ public sealed partial class AliceRpgGame
 
     private void DrawDialogueLog()
     {
-        GUI.color = new Color(0f, 0f, 0f, 0.67f);
-        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["white"]);
-        GUI.color = Color.white;
+        DrawDimmer(0.67f);
         DrawPanel(new Rect(110, 58, 740, 420));
         GUI.Label(new Rect(140, 78, 680, 42), "会話の記録", titleStyle);
         if (dialogueHistory.Count == 0) GUI.Label(new Rect(150, 205, 660, 40), "まだ記録された会話はありません。", centerStyle);
@@ -693,7 +661,7 @@ public sealed partial class AliceRpgGame
             if (MouseActivated(itemRect))
             {
                 endingSelection = i;
-                if (i == 0) StartNewGame(true); else if (i == 1) { recordsReturnMode = GameMode.Ending; mode = GameMode.Records; } else { mode = GameMode.Title; titleSelection = 0; }
+                ActivateEndingSelection();
             }
         }
     }
@@ -713,7 +681,7 @@ public sealed partial class AliceRpgGame
             if (MouseActivated(itemRect))
             {
                 gameOverSelection = i;
-                if (i == 0 && hasSave) RequestLoadSlot(activeSaveSlot, GameMode.GameOver); else { mode = GameMode.Title; titleSelection = hasSave ? 0 : 1; }
+                ActivateGameOverSelection();
             }
         }
     }
@@ -723,6 +691,13 @@ public sealed partial class AliceRpgGame
         GUI.color = Color.white;
         GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["titleBackdrop"]);
         GUI.color = highContrast ? Color.black : new Color(ink.r, ink.g, ink.b, 0.82f);
+        GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["white"]);
+        GUI.color = Color.white;
+    }
+
+    private void DrawDimmer(float opacity)
+    {
+        GUI.color = new Color(0f, 0f, 0f, opacity);
         GUI.DrawTexture(new Rect(0, 0, LogicalWidth, LogicalHeight), textures["white"]);
         GUI.color = Color.white;
     }

@@ -48,15 +48,17 @@ public sealed partial class AliceRpgGame
             saveSlotConfirmation = SaveSlotConfirmation.None;
             Play(confirmSound);
         }
-        else if (PressConfirm())
-        {
-            SaveSlotConfirmation confirmation = saveSlotConfirmation;
-            saveSlotConfirmation = SaveSlotConfirmation.None;
-            if (confirmation == SaveSlotConfirmation.Overwrite) CommitSaveSlot(saveSlotSelection);
-            else if (confirmation == SaveSlotConfirmation.RestoreBackup) RestoreBackupAndLoad(saveSlotSelection);
-            else if (confirmation == SaveSlotConfirmation.Delete) DeleteSaveSlot(saveSlotSelection);
-        }
+        else if (PressConfirm()) ConfirmSaveSlotSelection();
         return true;
+    }
+
+    private void ConfirmSaveSlotSelection()
+    {
+        SaveSlotConfirmation confirmation = saveSlotConfirmation;
+        saveSlotConfirmation = SaveSlotConfirmation.None;
+        if (confirmation == SaveSlotConfirmation.Overwrite) CommitSaveSlot(saveSlotSelection);
+        else if (confirmation == SaveSlotConfirmation.RestoreBackup) RestoreBackupAndLoad(saveSlotSelection);
+        else if (confirmation == SaveSlotConfirmation.Delete) DeleteSaveSlot(saveSlotSelection);
     }
 
     private void ActivateSaveSlotSelection()

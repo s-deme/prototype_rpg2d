@@ -35,6 +35,8 @@ public sealed class AliceRpgGameTests
     [TearDown]
     public void TearDown()
     {
+        foreach (Texture2D texture in ((Dictionary<string, Texture2D>)Field("textures").GetValue(game)).Values)
+            Object.DestroyImmediate(texture);
         Object.DestroyImmediate(host);
         ClearAliceRpgData();
         RestoreAliceRpgData();
@@ -70,7 +72,7 @@ public sealed class AliceRpgGameTests
         MethodInfo save = Method("SaveGame");
         MethodInfo keyForSlot = Method("SaveKey");
         MethodInfo hasRecoverable = Method("HasRecoverableSaveInSlot");
-        MethodInfo restore = Method("RestoreBackupAndLoad");
+        MethodInfo restore = Method("ConfirmSaveSlotSelection");
         string key = (string)keyForSlot.Invoke(game, new object[] { 0 });
 
         save.Invoke(game, new object[] { false });
@@ -79,7 +81,11 @@ public sealed class AliceRpgGameTests
         PlayerPrefs.Save();
 
         Assert.That((bool)hasRecoverable.Invoke(game, new object[] { 0 }), Is.True);
-        restore.Invoke(game, new object[] { 0 });
+        Field("saveSlotSelection").SetValue(game, 0);
+        FieldInfo confirmation = Field("saveSlotConfirmation");
+        confirmation.SetValue(game, System.Enum.Parse(confirmation.FieldType, "RestoreBackup"));
+        restore.Invoke(game, null);
+        Assert.That(confirmation.GetValue(game).ToString(), Is.EqualTo("None"));
         Assert.That(PlayerPrefs.GetString(key), Does.Not.Contain("not valid"));
     }
 
@@ -188,24 +194,24 @@ public sealed class AliceRpgGameTests
     [Test]
     public void FantasyUiTextures_AreGeneratedAtTheirLogicalSizes()
     {
+        Method("CreateTextures").Invoke(game, null);
         Dictionary<string, Texture2D> textures = (Dictionary<string, Texture2D>)Field("textures").GetValue(game);
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(textures["titleBackdrop"].width, Is.EqualTo(240));
-            Assert.That(textures["titleBackdrop"].height, Is.EqualTo(135));
-            Assert.That(textures["battleBackdrop"].width, Is.EqualTo(240));
-            Assert.That(textures["battleBackdrop"].height, Is.EqualTo(100));
-            Assert.That(textures["crown"].width, Is.EqualTo(32));
-            Assert.That(textures["battleShadow"].height, Is.EqualTo(10));
-        });
+        Assert.That(textures["titleBackdrop"].width, Is.EqualTo(240));
+        Assert.That(textures["titleBackdrop"].height, Is.EqualTo(135));
+        Assert.That(textures["battleBackdrop"].width, Is.EqualTo(240));
+        Assert.That(textures["battleBackdrop"].height, Is.EqualTo(100));
+        Assert.That(textures["crown"].width, Is.EqualTo(32));
+        Assert.That(textures["battleShadow"].height, Is.EqualTo(10));
+        Assert.That((Color32)textures["titleBackdrop"].GetPixel(0, 134), Is.EqualTo(new Color32(45, 105, 188, 255)));
+        Assert.That((Color32)textures["battleBackdrop"].GetPixel(239, 99), Is.EqualTo(new Color32(63, 133, 205, 255)));
     }
 
     [Test]
     public void DeletingTheActiveSlot_SelectsAnotherRecoverableSlot()
     {
         MethodInfo save = Method("SaveGame");
-        MethodInfo delete = Method("DeleteSaveSlot");
+        MethodInfo delete = Method("ConfirmSaveSlotSelection");
         FieldInfo activeSlot = Field("activeSaveSlot");
         FieldInfo hasSave = Field("hasSave");
 
@@ -215,7 +221,11 @@ public sealed class AliceRpgGameTests
         save.Invoke(game, new object[] { false });
         activeSlot.SetValue(game, 0);
 
-        delete.Invoke(game, new object[] { 0 });
+        Field("saveSlotSelection").SetValue(game, 0);
+        FieldInfo confirmation = Field("saveSlotConfirmation");
+        confirmation.SetValue(game, System.Enum.Parse(confirmation.FieldType, "Delete"));
+        delete.Invoke(game, null);
+        Assert.That(confirmation.GetValue(game).ToString(), Is.EqualTo("None"));
 
         Assert.That((int)activeSlot.GetValue(game), Is.EqualTo(1));
         Assert.That((bool)hasSave.GetValue(game), Is.True);
@@ -235,6 +245,107 @@ public sealed class AliceRpgGameTests
         selectRecoverableSlot.Invoke(game, null);
 
         Assert.That((int)activeSlot.GetValue(game), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void SettingsAndControlsSelections_OpenRebindAndReturnToTheirMenus()
+    {
+        FieldInfo mode = Field("mode");
+        FieldInfo settingsSelection = Field("settingsSelection");
+        FieldInfo controlsSelection = Field("controlsSelection");
+        MethodInfo activateSettings = Method("ActivateSettingsSelection");
+        MethodInfo activateControls = Method("ActivateControlsSelection");
+
+        mode.SetValue(game, System.Enum.Parse(mode.FieldType, "Settings"));
+        controlsSelection.SetValue(game, 3);
+        Field("rebindAction").SetValue(game, 2);
+        settingsSelection.SetValue(game, 10);
+        activateSettings.Invoke(game, null);
+        Assert.That(mode.GetValue(game).ToString(), Is.EqualTo("Controls"));
+        Assert.That((int)controlsSelection.GetValue(game), Is.Zero);
+        Assert.That((int)Field("rebindAction").GetValue(game), Is.EqualTo(-1));
+        Assert.That(Field("controlsReturnMode").GetValue(game).ToString(), Is.EqualTo("Settings"));
+
+        activateControls.Invoke(game, null);
+        Assert.That((int)Field("rebindAction").GetValue(game), Is.Zero);
+        Field("rebindAction").SetValue(game, -1);
+        controlsSelection.SetValue(game, 8);
+        activateControls.Invoke(game, null);
+        Assert.That(mode.GetValue(game).ToString(), Is.EqualTo("Settings"));
+
+        settingsSelection.SetValue(game, 11);
+        activateSettings.Invoke(game, null);
+        Assert.That((bool)Field("confirmResetSettings").GetValue(game), Is.True);
+        Assert.That(mode.GetValue(game).ToString(), Is.EqualTo("Settings"));
+        Field("confirmResetSettings").SetValue(game, false);
+        Field("settingsReturnMode").SetValue(game, System.Enum.Parse(mode.FieldType, "Pause"));
+        settingsSelection.SetValue(game, 12);
+        activateSettings.Invoke(game, null);
+        Assert.That(mode.GetValue(game).ToString(), Is.EqualTo("Pause"));
+    }
+
+    [Test]
+    public void TerminalSelections_OpenRecordsOrReturnToTheCorrectTitleItem()
+    {
+        FieldInfo mode = Field("mode");
+        MethodInfo activateEnding = Method("ActivateEndingSelection");
+
+        mode.SetValue(game, System.Enum.Parse(mode.FieldType, "Ending"));
+        Field("endingSelection").SetValue(game, 1);
+        activateEnding.Invoke(game, null);
+        Assert.That(mode.GetValue(game).ToString(), Is.EqualTo("Records"));
+        Assert.That(Field("recordsReturnMode").GetValue(game).ToString(), Is.EqualTo("Ending"));
+
+        mode.SetValue(game, System.Enum.Parse(mode.FieldType, "Ending"));
+        Field("titleSelection").SetValue(game, 3);
+        Field("endingSelection").SetValue(game, 2);
+        activateEnding.Invoke(game, null);
+        Assert.That(mode.GetValue(game).ToString(), Is.EqualTo("Title"));
+        Assert.That((int)Field("titleSelection").GetValue(game), Is.Zero);
+
+        mode.SetValue(game, System.Enum.Parse(mode.FieldType, "GameOver"));
+        Field("hasSave").SetValue(game, false);
+        Field("gameOverSelection").SetValue(game, 0);
+        Method("ActivateGameOverSelection").Invoke(game, null);
+        Assert.That(mode.GetValue(game).ToString(), Is.EqualTo("Title"));
+        Assert.That((int)Field("titleSelection").GetValue(game), Is.EqualTo(1));
+    }
+
+    [Test]
+    public void BattleSelections_WithMissingResourcesReturnToTheMenu()
+    {
+        FieldInfo selection = Field("battleSelection");
+        FieldInfo pending = Field("pendingBattle");
+        MethodInfo activateBattle = Method("ActivateBattleSelection");
+        Field("mp").SetValue(game, 0);
+        Field("potions").SetValue(game, 0);
+
+        selection.SetValue(game, 1);
+        activateBattle.Invoke(game, null);
+        Assert.That(pending.GetValue(game).ToString(), Is.EqualTo("Menu"));
+        Assert.That(Field("battleMessage").GetValue(game), Is.EqualTo("MPが足りない！"));
+        Assert.That((int)Field("mp").GetValue(game), Is.Zero);
+
+        pending.SetValue(game, System.Enum.Parse(pending.FieldType, "None"));
+        selection.SetValue(game, 3);
+        activateBattle.Invoke(game, null);
+        Assert.That(pending.GetValue(game).ToString(), Is.EqualTo("Menu"));
+        Assert.That(Field("battleMessage").GetValue(game), Is.EqualTo("小瓶はもう空っぽだ。"));
+        Assert.That((int)Field("potions").GetValue(game), Is.Zero);
+    }
+
+    [Test]
+    public void ChestIndexAt_ReturnsTheFirstMatchOrMinusOne()
+    {
+        List<Vector2Int> positions = (List<Vector2Int>)Field("chestPositions").GetValue(game);
+        positions.Clear();
+        positions.Add(new Vector2Int(1, 2));
+        positions.Add(new Vector2Int(3, 4));
+        positions.Add(new Vector2Int(3, 4));
+        MethodInfo chestIndexAt = Method("ChestIndexAt");
+
+        Assert.That((int)chestIndexAt.Invoke(game, new object[] { new Vector2Int(3, 4) }), Is.EqualTo(1));
+        Assert.That((int)chestIndexAt.Invoke(game, new object[] { new Vector2Int(4, 3) }), Is.EqualTo(-1));
     }
 
     private MethodInfo Method(string name)

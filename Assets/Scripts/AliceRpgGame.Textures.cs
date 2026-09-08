@@ -251,9 +251,7 @@ public sealed partial class AliceRpgGame
         Texture2D t = NewTexture(240, 135);
         Color horizon = new Color32(154, 218, 244, 255);
         Color zenith = new Color32(45, 105, 188, 255);
-        for (int y = 0; y < t.height; y++)
-            for (int x = 0; x < t.width; x++)
-                t.SetPixel(x, y, Color.Lerp(horizon, zenith, y / (float)(t.height - 1)));
+        FillVerticalGradient(t, horizon, zenith);
 
         Color cloud = new Color32(246, 250, 244, 255);
         Block(t, 18, 101, 31, 5, cloud); Block(t, 24, 106, 18, 4, cloud);
@@ -292,9 +290,7 @@ public sealed partial class AliceRpgGame
         Texture2D t = NewTexture(240, 100);
         Color horizon = new Color32(185, 228, 242, 255);
         Color zenith = new Color32(63, 133, 205, 255);
-        for (int y = 0; y < t.height; y++)
-            for (int x = 0; x < t.width; x++)
-                t.SetPixel(x, y, Color.Lerp(horizon, zenith, y / (float)(t.height - 1)));
+        FillVerticalGradient(t, horizon, zenith);
         Block(t, 17, 74, 40, 4, new Color32(247, 250, 241, 255));
         Block(t, 26, 78, 22, 4, new Color32(247, 250, 241, 255));
         Block(t, 0, 0, 240, 30, new Color32(73, 151, 76, 255));
@@ -340,8 +336,17 @@ public sealed partial class AliceRpgGame
     private void Fill(Texture2D texture, Color color)
     {
         Color[] colors = new Color[texture.width * texture.height];
-        for (int i = 0; i < colors.Length; i++) colors[i] = color;
+        System.Array.Fill(colors, color);
         texture.SetPixels(colors);
+    }
+
+    private void FillVerticalGradient(Texture2D texture, Color bottom, Color top)
+    {
+        for (int y = 0; y < texture.height; y++)
+        {
+            Color rowColor = Color.Lerp(bottom, top, y / (float)(texture.height - 1));
+            for (int x = 0; x < texture.width; x++) texture.SetPixel(x, y, rowColor);
+        }
     }
 
     private void Block(Texture2D texture, int x, int y, int width, int height, Color color)
