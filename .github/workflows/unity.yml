@@ -7,10 +7,12 @@ on:
 
 permissions:
   contents: read
-  checks: write
 
 jobs:
   test-and-build:
+    permissions:
+      contents: read
+      checks: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # actions/checkout@v4
