@@ -47,3 +47,6 @@
 - [CREDITS.md](CREDITS.md) — 制作・素材クレジット
 - [PRIVACY.md](PRIVACY.md) — 保存データとオフライン動作
 - [KNOWN_ISSUES.md](KNOWN_ISSUES.md) — 既知の制約と配布前確認
+
+
+Unity Personal CI authentication requires repository Actions secrets UNITY_LICENSE, UNITY_EMAIL, and UNITY_PASSWORD. Register them through GitHub Settings / Secrets and variables / Actions using the existing licensed Unity account; never put their values in Git or chat. Follow https://game.ci/docs/github/activation/. Missing credentials leave Unity CI unverified.
