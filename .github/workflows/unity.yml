@@ -40,6 +40,11 @@ jobs:
           name: Alice-RPG-EditMode-Test-Results
           path: ${{ steps.editor-tests.outputs.artifactsPath }}
           if-no-files-found: warn
+      # Unity tests can modify package files; build the exact tested revision.
+      - name: Restore tested revision for build
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Build Windows player
         uses: game-ci/unity-builder@4423ee75828dff56037d1d1cfdac6b68e3a6ba00 # game-ci/unity-builder@v4
         env:
