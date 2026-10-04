@@ -2,7 +2,7 @@
 
 ## Local Windows build
 
-1. Open the project with Unity 2022.3.62f1 or newer.
+1. Open the project with Unity 2022.3.62f3 or newer.
 2. Run `./scripts/Test-ReleasePreflight.ps1` from PowerShell to check release inputs, version wiring, dependency locks, tests, and CI configuration.
 3. Select `Alice RPG > Build Windows`.
 4. Collect the generated `Builds/Windows` directory as one unit; the executable needs its adjacent data files. The build also creates `Documentation` with the release documents.

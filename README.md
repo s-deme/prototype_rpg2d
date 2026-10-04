@@ -15,7 +15,7 @@
 
 ## 起動
 
-1. Unity Hubでこのフォルダーを **Unity 2022.3.62f1** として開きます。
+1. Unity Hubでこのフォルダーを **Unity 2022.3.62f3** として開きます。
 2. `Assets/Scenes/Main.unity` を開きます。
 3. Playボタンを押します。
 
