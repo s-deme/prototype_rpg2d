@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  test-and-build:
+  editor-tests:
     permissions:
       contents: read
       checks: write
@@ -40,8 +40,13 @@ jobs:
           name: Alice-RPG-EditMode-Test-Results
           path: ${{ steps.editor-tests.outputs.artifactsPath }}
           if-no-files-found: warn
-      # Unity tests can modify package files; build the exact tested revision.
-      - name: Restore tested revision for build
+
+  windows-build:
+    needs: editor-tests
+    runs-on: ubuntu-latest
+    steps:
+      # Build the tested commit in a fresh workspace, without test-generated files.
+      - name: Check out tested revision
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # actions/checkout@v4
         with:
           persist-credentials: false
